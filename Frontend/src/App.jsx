@@ -1,29 +1,45 @@
-import React from "react";
-import { BrowserRouter, Routes, Route, useNavigate,Navigate } from "react-router-dom";
-import SignUp from "./SignUp";
-import SignIn from "./SignIn";
-import Dashboard from './Dashboard';
-import ProtectedRoute from './ProtectedRoute';
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { Dashboard, HomeLayout, Landing,Login, Logout,Register  } from "./pages";
+import { ToastContainer, toast } from 'react-toastify';
 
-function SignUpPage() {
-  const navigate = useNavigate();
-  return <SignUp onSignupSuccess={() => navigate("/signin")} />;
-}
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <HomeLayout />,
+    children: [
+      {
+        index: true,
+        element: <Landing />,
+      },
+      {
+        path: "login",
+        element: <Login />,
+      },
+      {
+        path: "register",
+        element: <Register />,
+      },
+      {
+        path: "dashboard",
+        element: <Dashboard />,
+      },
+      {
+        path: "logout",
+        element: <Logout />,
+      }
+    ],
+  },
+]);
 
 function App() {
+
+
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/signup" element={<SignUpPage />} />
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/dashboard" element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        } />
-        <Route path="*" element={<Navigate to="/signup" replace />} />
-      </Routes>
-    </BrowserRouter>
-  );
+    <>
+        <RouterProvider router={router} />
+        <ToastContainer position='top-center' />
+    </>
+  )
 }
-export default App;
+
+export default App
