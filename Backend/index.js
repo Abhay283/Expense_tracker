@@ -1,11 +1,12 @@
-require("dotenv").config();
-require('express-async-errors');
+import dotenv from "dotenv";
+// import "express-async-errors"
+dotenv.config();
 
-const connectDB = require("./db/connect");
-const express = require("express");
-const cors = require('cors')
+import connectDB from "./db/connect.js";
+import express from "express";
+import cors from "cors";
 const app = express();
-const mainRouter = require("./routes/user");
+import mainRouter from "./routes/user.js";
 
 app.use(express.json());
 
