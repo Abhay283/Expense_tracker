@@ -3,6 +3,8 @@ import "../styles/Dashboard.css";
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import AddExpense from '../component/AddExpense';
+import VeiwExpense from '../component/VeiwExpense';
 
 const Dashboard = () => {
   const [ token, setToken ] = useState(JSON.parse(localStorage.getItem("auth")) || "");
@@ -40,6 +42,11 @@ const Dashboard = () => {
       <h1>Dashboard</h1>
       <p>Hi { data.msg }! { data.luckyNumber }</p>
       <Link to="/logout" className="logout-button">Logout</Link>
+
+      <div className="add-expense-section">
+        <h2>Add New Expense</h2>
+        <AddExpense token={token} /> 
+      </div>
     </div>
   )
 }

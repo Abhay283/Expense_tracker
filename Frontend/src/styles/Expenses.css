@@ -1,0 +1,36 @@
+.expenses-table-container {
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+.expenses-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.expenses-table th, .expenses-table td {
+  border: 1px solid #ccc;
+  padding: 0.5rem;
+  text-align: left;
+}
+
+.expenses-table th {
+  background-color: #f4f4f4;
+}
+
+.expenses-table td button {
+  margin-right: 0.5rem;
+}
+
+.pagination {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .expenses-table th, .expenses-table td {
+    padding: 0.3rem;
+  }
+}
