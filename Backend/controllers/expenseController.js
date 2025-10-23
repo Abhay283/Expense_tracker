@@ -1,76 +1,51 @@
-import expense from "../models/expense.js";  
+import Expense from "../models/expense.js";
 
-// ➕ Create expense
+// CREATE
 export const createExpense = async (req, res) => {
   try {
-    const newExpense = await expense.create(req.body);
-    res.status(201).json({ success: true, data: newExpense });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-};
-
-// 📃 Get all expenses
-export const getAllExpenses = async (req, res) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = 10;
-    const skip = (page - 1) * limit;
-
-    const expenses = await expense.find({ user: req.user.id })
-      .sort({ date: -1 }) // newest first
-      .skip(skip)
-      .limit(limit);
-
-    const total = await expense.countDocuments({ user: req.user.id });
-
-    res.status(200).json({
-      success: true,
-      data: expenses,
-      pagination: {
-        page,
-        totalPages: Math.ceil(total / limit),
-        totalItems: total
-      }
+    const { amount, category, description, date } = req.body;
+    const expense = new Expense({
+      user: req.user.id,
+      amount,
+      category,
+      description,
+      date,
     });
+    await expense.save();
+    res.status(201).json(expense);
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ msg: "Server error" });
   }
 };
 
-// 🔍 Get one expense
-export const getExpenseById = async (req, res) => {
+// READ
+export const getExpenses = async (req, res) => {
   try {
-    const singleExpense = await expense.findById(req.params.id);
-    if (!singleExpense) return res.status(404).json({ message: "Expense not found" });
-    res.status(200).json({ success: true, data: singleExpense });
+    const expenses = await Expense.find({ user: req.user.id }).sort({ date: -1 });
+    res.json(expenses);
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ msg: "Server error" });
   }
 };
 
-// ✏️ Update expense
+// UPDATE
 export const updateExpense = async (req, res) => {
   try {
-    const updatedExpense = await expense.findOneAndUpdate(
-      { _id: req.params.id, user: req.user.id },
-      req.body,
-      { new: true }
-    );
-    if (!updatedExpense) return res.status(404).json({ message: "Expense not found" });
-    res.status(200).json({ success: true, data: updatedExpense });
+    const expense = await Expense.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!expense) return res.status(404).json({ msg: "Expense not found" });
+    res.json(expense);
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ msg: "Server error" });
   }
 };
 
-// ❌ Delete expense
+// DELETE
 export const deleteExpense = async (req, res) => {
   try {
-    const deletedExpense = await expense.findOneAndDelete({ _id: req.params.id, user: req.user.id });
-    if (!deletedExpense) return res.status(404).json({ message: "Expense not found" });
-    res.status(200).json({ success: true, message: "Expense deleted" });
+    const expense = await Expense.findByIdAndDelete(req.params.id);
+    if (!expense) return res.status(404).json({ msg: "Expense not found" });
+    res.json({ message: "Deleted successfully" });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ msg: "Server error" });
   }
 };

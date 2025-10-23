@@ -7,6 +7,7 @@ import cors from "cors";
 const app = express();
 import mainRouter from "./routes/user.js";
 import expenseRoutes from "./routes/expenseRoutes.js";
+import categoryRoutes from "./routes/categoryRoutes.js";
 
 app.use(express.json());
 
@@ -17,6 +18,7 @@ app.use(cors({
 }));
 app.use("/api/v1", mainRouter);
 app.use("/api/v1/expenses", expenseRoutes);
+app.use("/api/v1/expenses", categoryRoutes);
 const port = process.env.PORT || 3000;
 
 const start = async () => {

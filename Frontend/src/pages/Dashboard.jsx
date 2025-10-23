@@ -3,8 +3,9 @@ import "../styles/Dashboard.css";
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import AddExpense from '../component/AddExpense';
-import VeiwExpense from '../component/VeiwExpense';
+
+import ExpenseManager from '../component/ExpenseManager';
+// import VeiwExpense from '../component/VeiwExpense';
 
 const Dashboard = () => {
   const [ token, setToken ] = useState(JSON.parse(localStorage.getItem("auth")) || "");
@@ -45,7 +46,7 @@ const Dashboard = () => {
 
       <div className="add-expense-section">
         <h2>Add New Expense</h2>
-        <AddExpense token={token} /> 
+        <ExpenseManager token={token} /> 
       </div>
     </div>
   )
