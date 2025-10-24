@@ -18,7 +18,7 @@ app.use(cors({
 }));
 app.use("/api/v1", mainRouter);
 app.use("/api/v1/expenses", expenseRoutes);
-app.use("/api/v1/expenses", categoryRoutes);
+app.use("/api/v1/categories", categoryRoutes);
 const port = process.env.PORT || 3000;
 
 const start = async () => {

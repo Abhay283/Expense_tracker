@@ -1,51 +1,59 @@
-import Expense from "../models/expense.js";
+import expense from "../models/expense.js";
+import Category from "../models/categoryModel.js";
 
-// CREATE
+// ➕ Create expense
 export const createExpense = async (req, res) => {
   try {
-    const { amount, category, description, date } = req.body;
-    const expense = new Expense({
-      user: req.user.id,
-      amount,
-      category,
-      description,
-      date,
-    });
-    await expense.save();
-    res.status(201).json(expense);
+    const newExpense = await expense.create({ ...req.body, user: req.user.id });
+    const populatedExpense = await newExpense.populate("category", "name"); // populate category name
+    res.status(201).json({ success: true, data: populatedExpense });
   } catch (err) {
-    res.status(500).json({ msg: "Server error" });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
-// READ
-export const getExpenses = async (req, res) => {
+// 📃 Get all expenses
+export const getAllExpenses = async (req, res) => {
   try {
-    const expenses = await Expense.find({ user: req.user.id }).sort({ date: -1 });
-    res.json(expenses);
+    const expenses = await expense
+      .find({ user: req.user.id })
+      .sort({ date: -1 })
+      .populate("category", "name"); // populate category name
+    res.status(200).json({ success: true, data: expenses });
   } catch (err) {
-    res.status(500).json({ msg: "Server error" });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
-// UPDATE
+// 🔍 Get single expense
+export const getExpenseById = async (req, res) => {
+  try {
+    const singleExpense = await expense.findById(req.params.id).populate("category", "name");
+    if (!singleExpense) return res.status(404).json({ message: "Expense not found" });
+    res.status(200).json({ success: true, data: singleExpense });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ✏️ Update expense
 export const updateExpense = async (req, res) => {
   try {
-    const expense = await Expense.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!expense) return res.status(404).json({ msg: "Expense not found" });
-    res.json(expense);
+    const updatedExpense = await expense
+      .findByIdAndUpdate(req.params.id, req.body, { new: true })
+      .populate("category", "name");
+    res.status(200).json({ success: true, data: updatedExpense });
   } catch (err) {
-    res.status(500).json({ msg: "Server error" });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
-// DELETE
+// ❌ Delete expense
 export const deleteExpense = async (req, res) => {
   try {
-    const expense = await Expense.findByIdAndDelete(req.params.id);
-    if (!expense) return res.status(404).json({ msg: "Expense not found" });
-    res.json({ message: "Deleted successfully" });
+    await expense.findByIdAndDelete(req.params.id);
+    res.status(200).json({ success: true, message: "Expense deleted" });
   } catch (err) {
-    res.status(500).json({ msg: "Server error" });
+    res.status(500).json({ success: false, message: err.message });
   }
 };

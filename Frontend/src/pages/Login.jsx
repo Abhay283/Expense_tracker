@@ -1,117 +1,69 @@
-import React, { useEffect, useState } from "react";
-import Image from "../assets/image.png";
-import Logo from "../assets/logo.png";
-import GoogleSvg from "../assets/icons8-google.svg";
-import { FaEye } from "react-icons/fa6";
-import { FaEyeSlash } from "react-icons/fa6";
-import "../styles/Login.css";
-import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
-import { toast } from "react-toastify";
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
-  const [showPassword, setShowPassword] = useState(false);
-  const [ token, setToken ] = useState(JSON.parse(localStorage.getItem("auth")) || "");
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [error, setError] = useState('');
+  const { login } = useAuth();
   const navigate = useNavigate();
 
-
-
-  const handleLoginSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    let email = e.target.email.value;
-    let password = e.target.password.value;
-
-    if (email.length > 0 && password.length > 0) {
-      const formData = {
-        email,
-        password,
-      };
-      try {
-        const response = await axios.post(
-          "http://localhost:3000/api/v1/login",
-          formData
-        );
-        localStorage.setItem('auth', JSON.stringify(response.data.token));
-        toast.success("Login successfull");
-        navigate("/dashboard");
-      } catch (err) {
-        console.log(err);
-        toast.error(err.message);
-      }
-      } else {
-      toast.error("Please fill all inputs");
+    setError('');
+    try {
+      await login(formData.email, formData.password);
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Login failed');
     }
   };
 
-  useEffect(() => {
-    if(token !== ""){
-      toast.success("You already logged in");
-      navigate("/dashboard");
-    }
-  }, []);
-
   return (
-    <div className="login-main">
-      <div className="login-left">
-        <img src={Image} alt="" />
-      </div>
-      <div className="login-right">
-        <div className="login-right-container">
-          <div className="login-logo">
-            <img src={Logo} alt="" />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
+        <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Login</h2>
+        
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {error}
           </div>
-          <div className="login-center">
-            <h2>Welcome back!</h2>
-            <p>Please enter your details</p>
-            <form onSubmit={handleLoginSubmit}>
-              <input type="email" placeholder="Email" name="email" />
-              <div className="pass-input-div">
-                <input
-                 type={showPassword ? "text" : "password"}
-                  placeholder="Password"
-                  name="password"
-                />
-                {showPassword ? (
-                  <FaEyeSlash
-                    onClick={() => {
-                      setShowPassword(!showPassword);
-                    }}
-                  />
-                ) : (
-                  <FaEye
-                    onClick={() => {
-                      setShowPassword(!showPassword);
-                    }}
-                  />
-                )}
-              </div>
+        )}
 
-              <div className="login-center-options">
-                <div className="remember-div">
-                  <input type="checkbox" id="remember-checkbox" />
-                  <label htmlFor="remember-checkbox">
-                    Remember for 30 days
-                  </label>
-                </div>
-                <a href="#" className="forgot-pass-link">
-                  Forgot password?
-                </a>
-              </div>
-
-              <div className="login-center-buttons">
-                <button type="submit">Log In</button>
-                <button type="submit">
-                  <img src={GoogleSvg} alt="" />
-                  Log In with Google
-                </button>
-              </div>
-            </form>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              placeholder="your@email.com"
+            />
           </div>
 
-          <p className="login-bottom-p">
-            Don't have an account? <Link to="/register">Sign Up</Link>
-          </p>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <input
+              type="password"
+              value={formData.password}
+              onChange={(e) => setFormData({...formData, password: e.target.value})}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              placeholder="••••••••"
+            />
+          </div>
+
+          <button
+            onClick={handleSubmit}
+            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 font-medium"
+          >
+            Login
+          </button>
         </div>
+
+        <p className="mt-4 text-center text-gray-600">
+          Don't have an account? <Link to="/register" className="text-blue-600 hover:underline">Register</Link>
+        </p>
       </div>
     </div>
   );

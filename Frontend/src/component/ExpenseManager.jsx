@@ -10,7 +10,8 @@ const ExpenseManager = () => {
   const fetchExpenses = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/expenses", {
+      console.log(token);
+      const res = await axios.get("/api/v1/expenses", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setExpenses(res.data.data);
@@ -26,11 +27,12 @@ const ExpenseManager = () => {
   // ✅ Add or Update expense
   const handleFormSubmit = async (data) => {
     const token = localStorage.getItem("token");
+    console.log(token);
     try {
       if (editingExpense) {
         // Update
         const res = await axios.put(
-          `http://localhost:5000/api/expenses/${editingExpense._id}`,
+          `http://localhost:3000/api/v1/expenses/${editingExpense._id}`,
           data,
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -39,7 +41,7 @@ const ExpenseManager = () => {
         alert("Expense updated successfully!");
       } else {
         // Add
-        const res = await axios.post("http://localhost:5000/api/expenses", data, {
+        const res = await axios.post("http://localhost:3000/api/v1/expenses", data, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setExpenses([res.data.data, ...expenses]);
@@ -60,8 +62,9 @@ const ExpenseManager = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure?")) return;
     const token = localStorage.getItem("token");
+    console.log(token);
     try {
-      await axios.delete(`http://localhost:5000/api/expenses/${id}`, {
+      await axios.delete(`http://localhost:3000/api/v1/expenses/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setExpenses(expenses.filter((exp) => exp._id !== id));

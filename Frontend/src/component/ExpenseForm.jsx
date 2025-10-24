@@ -16,7 +16,7 @@ export default function ExpenseForm({ onSubmit }) {
   const fetchCategories = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/categories", {
+      const res = await axios.get("http://localhost:3000/api/v1/categories", {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCategories(res.data);
@@ -44,7 +44,7 @@ export default function ExpenseForm({ onSubmit }) {
       // Add custom category first if entered
       if (form.customCategory) {
         const res = await axios.post(
-          "http://localhost:5000/api/categories",
+          "http://localhost:3000/api/v1/categories",
           { name: form.customCategory },
           { headers: { Authorization: `Bearer ${token}` } }
         );

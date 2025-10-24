@@ -1,106 +1,83 @@
-import React, { useEffect, useState } from "react";
-import Image from "../assets/image.png";
-import Logo from "../assets/logo.png";
-import GoogleSvg from "../assets/icons8-google.svg";
-import { FaEye } from "react-icons/fa6";
-import { FaEyeSlash } from "react-icons/fa6";
-import "../styles/Register.css";
-import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
-import { toast } from "react-toastify";
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
-const Login = () => {
-  const [ showPassword, setShowPassword ] = useState(false);
+const Register = () => {
+  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [error, setError] = useState('');
+  const { register } = useAuth();
   const navigate = useNavigate();
-  const [ token, setToken ] = useState(JSON.parse(localStorage.getItem("auth")) || "");
 
-
-
-  const handleRegisterSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    let name = e.target.name.value;
-    let lastname = e.target.lastname.value;
-    let email = e.target.email.value;
-    let password = e.target.password.value;
-    let confirmPassword = e.target.confirmPassword.value;
-
-    if(name.length > 0 && lastname.length > 0 && email.length > 0 && password.length > 0 && confirmPassword.length > 0){
-
-      if(password === confirmPassword){
-        const formData = {
-          username: name + " " + lastname,
-          email,
-          password
-        };
-        try{
-        const response = await axios.post("http://localhost:3000/api/v1/register", formData);
-         toast.success("Registration successfull");
-         navigate("/login");
-       }catch(err){
-         toast.error(err.message);
-       }
-      }else{
-        toast.error("Passwords don't match");
-      }
-      }else{
-      toast.error("Please fill all inputs");
+    setError('');
+    try {
+      await register(formData.name, formData.email, formData.password);
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Registration failed');
     }
-
-
-  }
-
-  useEffect(() => {
-    if(token !== ""){
-      toast.success("You already logged in");
-      navigate("/dashboard");
-    }
-  }, []);
+  };
 
   return (
-    <div className="register-main">
-      <div className="register-left">
-        <img src={Image} alt="" />
-      </div>
-      <div className="register-right">
-        <div className="register-right-container">
-          <div className="register-logo">
-            <img src={Logo} alt="" />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
+        <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Register</h2>
+        
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {error}
           </div>
-          <div className="register-center">
-            <h2>Welcome to our website!</h2>
-            <p>Please enter your details</p>
-            <form onSubmit={handleRegisterSubmit}>
-            <input type="text" placeholder="Name" name="name" required={true} />
-            <input type="text" placeholder="Lastname" name="lastname" required={true} />
-              <input type="email" placeholder="Email" name="email" required={true} />
-              <div className="pass-input-div">
-                <input type={showPassword ? "text" : "password"} placeholder="Password" name="password" required={true} />
-                {showPassword ? <FaEyeSlash onClick={() => {setShowPassword(!showPassword)}} /> : <FaEye onClick={() => {setShowPassword(!showPassword)}} />}
-                
-              </div>
-              <div className="pass-input-div">
-                <input type={showPassword ? "text" : "password"} placeholder="Confirm Password" name="confirmPassword" required={true} />
-                {showPassword ? <FaEyeSlash onClick={() => {setShowPassword(!showPassword)}} /> : <FaEye onClick={() => {setShowPassword(!showPassword)}} />}
-                
-              </div>
+        )}
 
-              <div className="register-center-buttons">
-                <button type="submit">Sign Up</button>
-                <button type="submit">
-                  <img src={GoogleSvg} alt="" />
-                  Sign Up with Google
-                </button>
-              </div>
-            </form>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              placeholder="Your name"
+            />
           </div>
 
-          <p className="login-bottom-p">
-            Already have an account? <Link to="/login">Login</Link>
-          </p>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              placeholder="your@email.com"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <input
+              type="password"
+              value={formData.password}
+              onChange={(e) => setFormData({...formData, password: e.target.value})}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              placeholder="••••••••"
+            />
+          </div>
+
+          <button
+            onClick={handleSubmit}
+            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 font-medium"
+          >
+            Register
+          </button>
         </div>
+
+        <p className="mt-4 text-center text-gray-600">
+          Already have an account? <Link to="/login" className="text-blue-600 hover:underline">Login</Link>
+        </p>
       </div>
     </div>
   );
 };
 
-export default Login;
+export default Register;

@@ -1,10 +1,10 @@
 import express from "express";
 import { getAllCategories, addCategory } from "../controllers/categoryController.js";
-import { verifyToken } from "../middleware/authMiddleware.js";
+import  authenticationMiddleware  from "../middleware/auth.js";
 
 const router = express.Router();
 
-router.get("/", verifyToken, getAllCategories);
-router.post("/", verifyToken, addCategory);
+router.get("/categories", authenticationMiddleware, getAllCategories);
+router.post("/", authenticationMiddleware, addCategory);
 
 export default router;
