@@ -165,7 +165,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 p-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <header className="bg-white rounded-lg shadow-lg p-6 mb-6">
@@ -187,7 +187,7 @@ const Dashboard = () => {
         {/* Summary Cards */}
         {summary && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
+            <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-blue-100">Total</span>
                 <TrendingUp className="w-5 h-5" />
@@ -195,7 +195,7 @@ const Dashboard = () => {
               <p className="text-3xl font-bold">₹{summary.totalExpenses.toFixed(2)}</p>
             </div>
 
-            <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg p-6 text-white">
+            <div className="bg-linear-to-br from-green-500 to-green-600 rounded-lg shadow-lg p-6 text-white">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-green-100">Average</span>
                 <DollarSign className="w-5 h-5" />
@@ -203,7 +203,7 @@ const Dashboard = () => {
               <p className="text-3xl font-bold">₹{summary.averageExpense.toFixed(2)}</p>
             </div>
 
-            <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg p-6 text-white">
+            <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg p-6 text-white">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-purple-100">Count</span>
                 <PieChart className="w-5 h-5" />
@@ -211,7 +211,7 @@ const Dashboard = () => {
               <p className="text-3xl font-bold">{summary.totalCount}</p>
             </div>
 
-            <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg shadow-lg p-6 text-white">
+            <div className="bg-linear-to-br from-orange-500 to-orange-600 rounded-lg shadow-lg p-6 text-white">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-orange-100">This Month</span>
                 <Calendar className="w-5 h-5" />

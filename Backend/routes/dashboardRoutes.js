@@ -6,11 +6,7 @@ const authMiddleware = require('../middleware/auth');
 // All routes are protected
 router.use(authMiddleware);
 
-// Expense CRUD
-router.post('/', expenseController.createExpense);
-router.get('/', expenseController.getExpenses);
-router.get('/:id', expenseController.getExpense);
-router.put('/:id', expenseController.updateExpense);
-router.delete('/:id', expenseController.deleteExpense);
+router.get('/summary', expenseController.getDashboardSummary);
+router.get('/monthly', expenseController.getMonthlyStats);
 
 module.exports = router;
