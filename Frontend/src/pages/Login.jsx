@@ -1,72 +1,140 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
+
 const Login = () => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const [error, setError] = useState('');
-  const { login } = useAuth();
-  const navigate = useNavigate();
+const [formData, setFormData] = useState({ email: '', password: '' });
+const [error, setError] = useState('');
+const [loading, setLoading] = useState(false);
+const [showPassword, setShowPassword] = useState(false);
+const { login, googleSignIn } = useAuth();
+const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    try {
-      await login(formData.email, formData.password);
-      navigate('/dashboard');
-    } catch (err) {
-      setError(err.response?.data?.error || 'Login failed');
-    }
-  };
 
-  return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
-        <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Login</h2>
-        
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
-          </div>
-        )}
+useEffect(() => {
+if (import.meta.env.VITE_GOOGLE_CLIENT_ID) {
+const id = 'gsi-script';
+if (!document.getElementById(id)) {
+const s = document.createElement('script');
+s.src = 'https://accounts.google.com/gsi/client';
+s.id = id;
+s.async = true;
+s.defer = true;
+document.body.appendChild(s);
+}
+}
+}, []);
 
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              placeholder="your@email.com"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input
-              type="password"
-              value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              placeholder="••••••••"
-            />
-          </div>
-
-          <button
-            onClick={handleSubmit}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 font-medium"
-          >
-            Login
-          </button>
-        </div>
-
-        <p className="mt-4 text-center text-gray-600">
-          Don't have an account? <Link to="/register" className="text-blue-600 hover:underline">Register</Link>
-        </p>
-      </div>
-    </div>
-  );
+const handleSubmit = async (e) => {
+e.preventDefault();
+setError('');
+if (!formData.email || !formData.password) return setError('Enter email and password');
+setLoading(true);
+try {
+await login(formData.email, formData.password);
+navigate('/dashboard');
+} catch (err) {
+setError(err.response?.data?.error || 'Login failed');
+}
+setLoading(false);
 };
+
+const handleGoogle = () => {
+const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+if (!clientId) return setError('Google Client ID not configured in .env');
+
+
+if (window.google && window.google.accounts) {
+window.google.accounts.id.initialize({
+client_id: clientId,
+callback: async (res) => {
+try {
+setLoading(true);
+await googleSignIn(res.credential);
+navigate('/dashboard');
+} catch (err) {
+setError('Google sign-in failed');
+} finally {
+setLoading(false);
+}
+}
+});
+
+
+window.google.accounts.id.prompt();
+} else {
+setError('Google SDK not loaded yet. Refresh and try again.');
+}
+};
+
+return (
+<div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-6">
+<div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+<h2 className="text-2xl font-semibold text-gray-800 mb-2">Welcome back</h2>
+<p className="text-sm text-gray-500 mb-6">Log in to continue tracking your expenses</p>
+
+
+{error && (
+<div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded mb-4">
+{error}
+</div>
+)}
+
+
+<form onSubmit={handleSubmit} className="space-y-4">
+<div>
+<label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+<input
+type="email"
+value={formData.email}
+onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+placeholder="you@domain.com"
+/>
+</div>
+
+<div>
+<label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+<div className="relative">
+<input
+type={showPassword ? 'text' : 'password'}
+value={formData.password}
+onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+placeholder="Your password"
+/>
+<button type="button" onClick={() => setShowPassword(s => !s)} className="absolute right-2 top-2 p-1">
+{showPassword ? <EyeOff className="w-5 h-5 text-gray-600" /> : <Eye className="w-5 h-5 text-gray-600" />}
+</button>
+</div>
+</div>
+
+
+<button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-2 rounded-lg font-semibold disabled:opacity-60">
+{loading ? 'Signing in...' : 'Sign in'}
+</button>
+
+
+<div className="flex items-center gap-3">
+<hr className="flex-1 border-gray-200" />
+<span className="text-sm text-gray-400">or</span>
+<hr className="flex-1 border-gray-200" />
+</div>
+
+<button type="button" onClick={handleGoogle} className="w-full border border-gray-200 rounded-lg py-2 flex items-center justify-center gap-3 hover:shadow">
+<img src="/google-logo.svg" alt="google" className="w-5 h-5" />
+<span className="text-sm font-medium">Continue with Google</span>
+</button>
+
+
+<p className="text-center text-sm text-gray-500">Don't have an account? <Link to="/register" className="text-blue-600 font-medium">Create one</Link></p>
+</form>
+</div>
+</div>
+);
+};
+
 
 export default Login;
