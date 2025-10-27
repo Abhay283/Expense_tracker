@@ -1,61 +1,45 @@
+// controllers/expenseController.js
 const Expense = require('../models/expense');
 
-// @desc    Create new expense
-// @route   POST /api/expenses
-// @access  Private
+// Create
 exports.createExpense = async (req, res) => {
   try {
     const { title, amount, category, date, description } = req.body;
-
-    // Validate required fields
-    if (!title || !amount || !category || !date) {
+    if (!title || amount == null || !category || !date) {
       return res.status(400).json({ error: 'Please provide all required fields' });
     }
 
     const expense = new Expense({
       userId: req.userId,
       title,
-      amount,
+      amount: Number(amount),
       category,
-      date,
+      date: new Date(date),
       description
     });
 
     await expense.save();
 
-    res.status(201).json({
-      success: true,
-      message: 'Expense created successfully',
-      expense
-    });
+    res.status(201).json({ success: true, message: 'Expense created successfully', expense });
   } catch (error) {
     console.error('Create Expense Error:', error);
     res.status(500).json({ error: 'Server error while creating expense' });
   }
 };
 
-// @desc    Get all expenses with filters
-// @route   GET /api/expenses
-// @access  Private
+// Get all
 exports.getExpenses = async (req, res) => {
   try {
     const { startDate, endDate, category, search } = req.query;
-
     let query = { userId: req.userId };
 
-    // Date range filter
     if (startDate || endDate) {
       query.date = {};
       if (startDate) query.date.$gte = new Date(startDate);
       if (endDate) query.date.$lte = new Date(endDate);
     }
 
-    // Category filter
-    if (category && category !== 'All') {
-      query.category = category;
-    }
-
-    // Search filter
+    if (category && category !== 'All') query.category = category;
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: 'i' } },
@@ -64,117 +48,70 @@ exports.getExpenses = async (req, res) => {
     }
 
     const expenses = await Expense.find(query).sort({ date: -1 });
-
-    res.json({
-      success: true,
-      count: expenses.length,
-      expenses
-    });
+    res.json({ success: true, count: expenses.length, expenses });
   } catch (error) {
     console.error('Get Expenses Error:', error);
     res.status(500).json({ error: 'Server error while fetching expenses' });
   }
 };
 
-// @desc    Get single expense
-// @route   GET /api/expenses/:id
-// @access  Private
+// Get single
 exports.getExpense = async (req, res) => {
   try {
-    const expense = await Expense.findOne({
-      _id: req.params.id,
-      userId: req.userId
-    });
-
-    if (!expense) {
-      return res.status(404).json({ error: 'Expense not found' });
-    }
-
-    res.json({
-      success: true,
-      expense
-    });
+    const expense = await Expense.findOne({ _id: req.params.id, userId: req.userId });
+    if (!expense) return res.status(404).json({ error: 'Expense not found' });
+    res.json({ success: true, expense });
   } catch (error) {
     console.error('Get Expense Error:', error);
     res.status(500).json({ error: 'Server error while fetching expense' });
   }
 };
 
-// @desc    Update expense
-// @route   PUT /api/expenses/:id
-// @access  Private
+// Update
 exports.updateExpense = async (req, res) => {
   try {
     const { title, amount, category, date, description } = req.body;
-
     const expense = await Expense.findOneAndUpdate(
       { _id: req.params.id, userId: req.userId },
-      { title, amount, category, date, description },
+      { title, amount: Number(amount), category, date: new Date(date), description },
       { new: true, runValidators: true }
     );
-
-    if (!expense) {
-      return res.status(404).json({ error: 'Expense not found' });
-    }
-
-    res.json({
-      success: true,
-      message: 'Expense updated successfully',
-      expense
-    });
+    if (!expense) return res.status(404).json({ error: 'Expense not found' });
+    res.json({ success: true, message: 'Expense updated successfully', expense });
   } catch (error) {
     console.error('Update Expense Error:', error);
     res.status(500).json({ error: 'Server error while updating expense' });
   }
 };
 
-// @desc    Delete expense
-// @route   DELETE /api/expenses/:id
-// @access  Private
+// Delete
 exports.deleteExpense = async (req, res) => {
   try {
-    const expense = await Expense.findOneAndDelete({
-      _id: req.params.id,
-      userId: req.userId
-    });
-
-    if (!expense) {
-      return res.status(404).json({ error: 'Expense not found' });
-    }
-
-    res.json({
-      success: true,
-      message: 'Expense deleted successfully'
-    });
+    const expense = await Expense.findOneAndDelete({ _id: req.params.id, userId: req.userId });
+    if (!expense) return res.status(404).json({ error: 'Expense not found' });
+    res.json({ success: true, message: 'Expense deleted successfully' });
   } catch (error) {
     console.error('Delete Expense Error:', error);
     res.status(500).json({ error: 'Server error while deleting expense' });
   }
 };
 
-// @desc    Get dashboard summary
-// @route   GET /api/dashboard/summary
-// @access  Private
+// Dashboard summary + monthly functions (you already had)
 exports.getDashboardSummary = async (req, res) => {
   try {
     const expenses = await Expense.find({ userId: req.userId });
 
-    // Total expenses
-    const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+    const totalExpenses = expenses.reduce((sum, exp) => sum + (exp.amount || 0), 0);
 
     // Category breakdown
     const categoryBreakdown = {};
     expenses.forEach(exp => {
-      if (!categoryBreakdown[exp.category]) {
-        categoryBreakdown[exp.category] = 0;
-      }
-      categoryBreakdown[exp.category] += exp.amount;
+      categoryBreakdown[exp.category] = (categoryBreakdown[exp.category] || 0) + (exp.amount || 0);
     });
 
-    // Monthly breakdown (last 6 months)
+    // Monthly last 6 months
     const monthlyData = {};
     const now = new Date();
-
     for (let i = 5; i >= 0; i--) {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthKey = date.toLocaleString('default', { month: 'short', year: 'numeric' });
@@ -184,9 +121,7 @@ exports.getDashboardSummary = async (req, res) => {
     expenses.forEach(exp => {
       const expDate = new Date(exp.date);
       const monthKey = expDate.toLocaleString('default', { month: 'short', year: 'numeric' });
-      if (monthlyData.hasOwnProperty(monthKey)) {
-        monthlyData[monthKey] += exp.amount;
-      }
+      if (monthlyData.hasOwnProperty(monthKey)) monthlyData[monthKey] += exp.amount || 0;
     });
 
     res.json({
@@ -203,24 +138,17 @@ exports.getDashboardSummary = async (req, res) => {
   }
 };
 
-// @desc    Get monthly stats
-// @route   GET /api/dashboard/monthly
-// @access  Private
 exports.getMonthlyStats = async (req, res) => {
   try {
     const { year, month } = req.query;
-    const currentYear = year || new Date().getFullYear();
-    const currentMonth = month || new Date().getMonth() + 1;
+    const currentYear = year ? Number(year) : new Date().getFullYear();
+    const currentMonth = month ? Number(month) : new Date().getMonth() + 1;
 
     const startDate = new Date(currentYear, currentMonth - 1, 1);
     const endDate = new Date(currentYear, currentMonth, 0);
 
-    const expenses = await Expense.find({
-      userId: req.userId,
-      date: { $gte: startDate, $lte: endDate }
-    });
-
-    const total = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+    const expenses = await Expense.find({ userId: req.userId, date: { $gte: startDate, $lte: endDate } });
+    const total = expenses.reduce((sum, exp) => sum + (exp.amount || 0), 0);
 
     res.json({
       success: true,

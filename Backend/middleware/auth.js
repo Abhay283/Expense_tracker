@@ -1,10 +1,11 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const User = require('../models/user');
 
 const authMiddleware = async (req, res, next) => {
   try {
     // Get token from header
-    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const authHeader=req.header('Authorization')|| '';
+    const token = authHeader.replace('Bearer ', '');
 
     if (!token) {
       return res.status(401).json({ error: 'No token provided. Authorization denied.' });
@@ -12,6 +13,9 @@ const authMiddleware = async (req, res, next) => {
 
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+
+    const userId=decoded.userId || decoded.id || decoded._id;
+    if(!userId)return res.status(401).json({error:'Invalid token payload'});
 
     // Find user
     const user = await User.findById(decoded.userId).select('-password');
@@ -21,10 +25,11 @@ const authMiddleware = async (req, res, next) => {
     }
 
     // Attach user to request
-    req.userId = decoded.userId;
+    req.userId = user._id;
     req.user = user;
     next();
   } catch (error) {
+    console.error('Auth middleware error:',error);
     if (error.name === 'JsonWebTokenError') {
       return res.status(401).json({ error: 'Invalid token' });
     }

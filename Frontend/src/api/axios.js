@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'http://localhost:3000/api'
+  baseURL: import.meta.env.vite_API_BASE ||'http://localhost:3000/api',
+  withCredentials:true
 });
 
 // Add token to every request

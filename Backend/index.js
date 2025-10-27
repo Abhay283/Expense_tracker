@@ -1,3 +1,4 @@
+// index.js
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
@@ -13,13 +14,20 @@ const dashboardRoutes = require('./routes/dashboardRoutes');
 const app = express();
 
 // Middleware
-app.use(cors());
 app.use(express.json());
+
+// CORS - allow Vite dev origin and allow Authorization header
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
+app.use(cors({
+  origin: FRONTEND_ORIGIN,
+  credentials: true,
+  exposedHeaders: ['Authorization']
+}));
 
 // Connect to MongoDB
 connectDB();
 
-// Routes
+// Routes (prefix /api)
 app.use('/api/auth', authRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/dashboard', dashboardRoutes);

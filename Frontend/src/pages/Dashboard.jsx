@@ -524,7 +524,7 @@ const Dashboard = () => {
             <h2 className="text-xl font-bold text-gray-800 mb-4">Monthly Breakdown (Last 6 Months)</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               {Object.entries(summary.monthlyBreakdown).map(([month, amount]) => (
-                <div key={month} className="p-4 bg-gradient-to-br from-indigo-50 to-blue-50 rounded-lg">
+                <div key={month} className="p-4 bg-linear-to-br from-indigo-50 to-blue-50 rounded-lg">
                   <p className="text-sm font-medium text-gray-600 mb-1">{month}</p>
                   <p className="text-xl font-bold text-gray-800">₹{amount.toFixed(2)}</p>
                 </div>
